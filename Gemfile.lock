@@ -1,0 +1,12 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    gist (2.0.4)
+    git (1.2.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  gist
+  git
