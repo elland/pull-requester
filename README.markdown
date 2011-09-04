@@ -17,10 +17,6 @@ Options:
 
   -u    --url URL     "repo url"  
 
-  -f    --file FILE   "provide a custom filename (without extension)"  
-
-  -t    --type TYPE    "provide custom extension (without .dot) for syntax highlighting (default is rb)"  
-
 
 Suggestions and Ideas
 ---------------------

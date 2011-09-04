@@ -33,14 +33,6 @@ def main
     opts.on("-u", "--url [URL]", "You must profile a url!") do |url|
       options[:url] = url
     end
-
-    opts.on("-f", "--file [FILE]", "Provide a custom file name.") do |file|
-      options[:file] = file
-    end
-
-    opts.on("-t", "--type [TYPE]", "Provide a custom type (extension as in .rb or .cpp) for syntax hilighting!") do |type|
-      options[:type] = type
-    end
     
     # asks for help
     opts.on("-h", "--help", @help) do |help|
@@ -64,35 +56,30 @@ def main
   elsif (options[:url].nil? || options[:url].empty?) 
     puts "You must provide a url!"
     exit
-  elsif (options[:file].nil? || options[:file].empty?) 
-    options[:file] = "rp.txt"
-  elsif (options[:type].nil? || options[:type].empty?) 
-    puts "No type provided, falling back to ruby!"
-    options[:type] = "rb"
   end
 
-  # set filename
-  options[:filename] = "#{options[:file]}.#{options[:type]}"
-
-  puts options
+  #puts options
 
   #actual code! :D
-  if system("git request-pull -p #{options[:sha]} #{options[:url]} > #{options[:filename]}")
-
+  begin
+    diff = ""
+    IO.popen("git request-pull -p #{options[:sha]} #{options[:url]}") {|io| while (line = io.gets) do diff += line  end}
+    #dumps diff to escape all chars
+    diff_dump = diff.dump
     # gets the gist link
-    IO.popen("gist << #{options[:filename]}") { |io| while (line = io.gets) do gist = line end }
-
+    system( "echo #{diff_dump} | gist -t diff > /tmp/pull_request_diff_gist_buffer" )
+    
     # mails gist link to recipient
-    if system("mail -s \"[Pull Request]#{options[:msg] ||= options[:sha]}\" #{options[:recipient]} < #{gist}")
+    if system("mail -E -s \"[Pull Request]  #{options[:msg] || options[:sha]}\" #{options[:recipient]} < /tmp/pull_request_diff_gist_buffer")
       puts "Success!"
       exit
     else
       puts "Something went wrong sending email!"
       exit
     end
-  else
+  rescue
     puts "Something went wrong running git!"
-    exit
+    exit and return
   end
 end
 
@@ -106,10 +93,6 @@ def load_help
   -s    --sha SHA     "start commit SHA"  
 
   -u    --url URL     "repo url"  
-
-  -f    --file FILE   "provide a custom filename (without extension)"  
-
-  -t    --type TYPE    "provide custom extension (without .dot) for syntax highlighting (default is rb)"  
 
 END
 end
