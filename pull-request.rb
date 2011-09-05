@@ -20,10 +20,9 @@ def main
   options = {}
   OptionParser.new do |opts|
     opts.banner = "Usage: pull-request.rb -s|--subject receiver@email.com"
-    opts.separator ""
 
-    opts.on("-r", "--recipient [RECIPIENT]", "You must provide a recipient email!") do |r|
-      options[:recipient] = r
+    opts.on("--recipients x,y,z", Array, "You must provide a list of recipient emails!") do |recipients|
+      options[:recipient] = recipients.join(', ')
     end
 
     opts.on("-s", "--sha [SHA]", "You must provide a SHA!") do |sha|
@@ -45,7 +44,7 @@ def main
     puts @help
     exit
   end
-
+  puts options[:recipient]
   # exit if no recipent is given
   if (options[:recipient].nil? || options[:recipient].empty?) 
     puts "ERROR: You must provide a recipient email!"
@@ -70,7 +69,7 @@ def main
     system( "echo #{diff_dump} | gist -t diff > /tmp/pull_request_diff_gist_buffer" )
     
     # mails gist link to recipient
-    if system("mail -E -s \"[Pull Request]  #{options[:msg] || options[:sha]}\" #{options[:recipient]} < /tmp/pull_request_diff_gist_buffer")
+    if system("mail -E -s \"[Pull Request]  #{options[:msg] || options[:sha]}\" -c #{options[:recipient]} < /tmp/pull_request_diff_gist_buffer")
       puts "Success!"
       exit
     else

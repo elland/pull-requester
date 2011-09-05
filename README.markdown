@@ -11,7 +11,7 @@ Download the source and link/move it to /usr/local/bin
 Options:
 --------
 
-  -r    --recipent    "email receiver"  
+  --recipients x,y,z   "List of recipient emails, separated by commas (without spaces)"
 
   -s    --sha SHA     "start commit SHA"  
 
